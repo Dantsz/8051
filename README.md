@@ -7,3 +7,4 @@ https://www.silabs.com/documents/public/presentations/8051_Instruction_Set.pdf
 https://technobyte.org/8051-microcontroller-course/
 https://www.aldec.com/files/ip_products/IP-AL8051%20Core%20Application%20Note.pdf
 ![image](https://user-images.githubusercontent.com/19265585/195666955-7a61c15a-2af6-4765-8b39-e599e65584c2.png)
+https://en.wikipedia.org/wiki/Intel_8051
