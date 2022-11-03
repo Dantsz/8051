@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1666366609">
+<GenRun Id="synth_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1667511641">
   <File Type="VDS-TIMING-PB" Name="test_timing_summary_synth.pb"/>
   <File Type="VDS-TIMINGSUMMARY" Name="test_timing_summary_synth.rpt"/>
   <File Type="RDS-DCP" Name="test.dcp"/>
@@ -17,6 +17,12 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
+    <File Path="$PSRCDIR/sources_1/new/alu.vhd">
+      <FileInfo SFType="VHDL2008">
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
     <File Path="$PSRCDIR/sources_1/new/display.vhd">
       <FileInfo SFType="VHDL2008">
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -29,7 +35,14 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/new/alu.vhd">
+    <File Path="$PSRCDIR/sources_1/new/uart_test.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/uart_tx.vhd">
       <FileInfo>
         <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
@@ -39,7 +52,6 @@
     <Config>
       <Option Name="DesignMode" Val="RTL"/>
       <Option Name="TopModule" Val="test"/>
-      <Option Name="TopAutoSet" Val="TRUE"/>
     </Config>
   </FileSet>
   <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
@@ -50,8 +62,14 @@
         <Attr Name="UsedIn" Val="implementation"/>
       </FileInfo>
     </File>
+    <File Path="$PSRCDIR/constrs_1/new/test.xdc">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+      </FileInfo>
+    </File>
     <Config>
-      <Option Name="TargetConstrsFile" Val="$PSRCDIR/constrs_1/new/urtc.xdc"/>
+      <Option Name="TargetConstrsFile" Val="$PSRCDIR/constrs_1/new/test.xdc"/>
       <Option Name="ConstrsType" Val="XDC"/>
     </Config>
   </FileSet>

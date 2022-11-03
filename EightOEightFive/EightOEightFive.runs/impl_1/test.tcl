@@ -77,6 +77,7 @@ set rc [catch {
   set_property ip_cache_permissions {read write} [current_project]
   add_files -quiet /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.runs/synth_1/test.dcp
   read_xdc /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/constrs_1/new/urtc.xdc
+  read_xdc /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/constrs_1/new/test.xdc
   link_design -top test -part xc7a35tcpg236-1
   close_msg_db -file init_design.pb
 } RESULT]

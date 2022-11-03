@@ -1,7 +1,7 @@
 Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2018.2 (lin64) Build 2258646 Thu Jun 14 20:02:38 MDT 2018
-| Date         : Fri Oct 21 18:38:48 2022
+| Date         : Thu Nov  3 23:42:39 2022
 | Host         : dan-ZenBook-UX431DA-UM431DA running 64-bit Ubuntu 20.04.5 LTS
 | Command      : report_timing_summary -max_paths 10 -file test_timing_summary_routed.rpt -pb test_timing_summary_routed.pb -rpx test_timing_summary_routed.rpx -warn_on_violation
 | Design       : test
@@ -52,7 +52,7 @@ Table of Contents
 
 1. checking no_clock
 --------------------
- There are 51 register/latch pins with no clock driven by root clock pin: clk (HIGH)
+ There are 35 register/latch pins with no clock driven by root clock pin: clk (HIGH)
 
 
 2. checking constant_clock
@@ -67,7 +67,7 @@ Table of Contents
 
 4. checking unconstrained_internal_endpoints
 --------------------------------------------
- There are 68 pins that are not constrained for maximum delay. (HIGH)
+ There are 36 pins that are not constrained for maximum delay. (HIGH)
 
  There are 0 pins that are not constrained for maximum delay due to constant clock.
 

@@ -35,7 +35,10 @@ read_vhdl -library xil_defaultlib {
   /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/sources_1/new/debouncer.vhd
   /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/sources_1/new/test.vhd
 }
-read_vhdl -vhdl2008 -library xil_defaultlib /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/sources_1/new/display.vhd
+read_vhdl -vhdl2008 -library xil_defaultlib {
+  /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/sources_1/new/alu.vhd
+  /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/sources_1/new/display.vhd
+}
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the
 # design are intentionally left as such for best results. Dcp files will be
@@ -46,6 +49,9 @@ foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
 }
 read_xdc /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/constrs_1/new/urtc.xdc
 set_property used_in_implementation false [get_files /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/constrs_1/new/urtc.xdc]
+
+read_xdc /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/constrs_1/new/test.xdc
+set_property used_in_implementation false [get_files /mnt/390FE82F60C53228/Hardware/8051/EightOEightFive/EightOEightFive.srcs/constrs_1/new/test.xdc]
 
 set_param ips.enableIPCacheLiteLoad 0
 close [open __synthesis_is_running__ w]
