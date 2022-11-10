@@ -56,7 +56,7 @@ begin
         when "0" =>           
             rez <= std_logic_vector(unsigned_buffer(7 downto 0));   
         when "1" => 
-            rez <= std_logic_vector(signed(a) + signed(b));
+            rez <= a and b;
     end case;
 end process;
 unsigned_buffer <= unsigned("0" & a) + unsigned(b);

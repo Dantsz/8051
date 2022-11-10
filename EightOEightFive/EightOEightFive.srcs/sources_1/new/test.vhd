@@ -46,20 +46,33 @@ architecture Behavioral of test is
 signal number : std_logic_vector(15 downto 0):= X"0000";
 signal increment_signal : std_logic;
 signal alu_select: std_logic_vector(0 downto 0);
+
+signal acumulator: std_logic_vector(7 downto 0);
+signal acumulator_input: std_logic_vector(7 downto 0);
 begin
     
   
-    alu_select(0) <= increment_signal;
+   
     alu: entity work.alu(Behavioral)
     port map(
-        a => sw(7 downto 0),
-        b => sw(15 downto 8),
-        sel => alu_select,
-        rez => number(7 downto 0),
+        a => acumulator,
+        b => sw(7 downto 0),
+        sel => "0",
+        rez => acumulator_input,
         carry_out => led(0),
         aux_carry_out => led(1),
         ov => led(2)
     );
+    
+    accumulator_process: process(clk) 
+    begin
+        if rising_edge(clk) then
+            if increment_signal = '1' then
+                acumulator <= acumulator_input;
+            end if;
+        end if;
+    end process;
+    
     debouncer: entity work.Debouncer(Behavioral)
     port map(
     clk => clk,
@@ -69,7 +82,7 @@ begin
        
     ssd: entity work.SevenSegmentDisplay4Digits(Behavioral)
     port map(
-        number => number,
+        number => X"00" & acumulator,
         clk => clk,
         cat => cat,
         an  => an
