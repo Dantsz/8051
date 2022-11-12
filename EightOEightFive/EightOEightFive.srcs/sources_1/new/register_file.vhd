@@ -33,9 +33,9 @@ use ieee.numeric_std.all;
 
 entity register_file is
     port(
-     ra1 : in std_logic_vector(6 downto 0);
-     ra2 : in std_logic_vector(6 downto 0);
-     wa : in std_logic_vector(6 downto 0);
+     ra1 : in std_logic_vector(7 downto 0);
+     ra2 : in std_logic_vector(7 downto 0);
+     wa : in std_logic_vector(7 downto 0);
      
      write_value : in std_logic_vector(7 downto 0);
      read_value_1: out std_logic_vector(7 downto 0);
@@ -47,9 +47,8 @@ entity register_file is
 end register_file;
 
 architecture Behavioral of register_file is
-type reg_ar is array (0 to 127) of std_logic_vector(7 downto 0);
+type reg_ar is array (0 to 255) of std_logic_vector(7 downto 0);
 signal state : reg_ar := (others=>X"00");
-
 begin
 
     process(clk,write_enable)
