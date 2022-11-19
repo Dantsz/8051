@@ -45,33 +45,103 @@ end test;
 architecture Behavioral of test is
 signal number : std_logic_vector(15 downto 0):= X"0000";
 signal increment_signal : std_logic;
-signal alu_select: std_logic_vector(0 downto 0);
+signal increment_twelve: std_logic;
+
+signal alu_select: std_logic_vector(1 downto 0) := "00";
+signal alu_output: std_logic_vector(7 downto 0);
 
 signal acumulator: std_logic_vector(7 downto 0);
-signal acumulator_input: std_logic_vector(7 downto 0);
+signal acumulator_write : std_logic;
+
+signal aux_c_out : std_logic;
+
+signal uc_state : std_logic_vector(27 downto 0);
+
+signal bus_wire: std_logic_vector(7 downto 0);
+signal bus_input_control: std_logic_vector(1 downto 0);
+
+signal mem_out: std_logic_vector(7 downto 0);
+
+
+signal temp_reg1: std_logic_vector(7 downto 0);
+signal temp_reg2: std_logic_vector(7 downto 0);
+signal write_to_temp_control: std_logic_vector(1 downto 0);
+
 begin
-    
-  
-   
+
     alu: entity work.alu(Behavioral)
     port map(
-        a => acumulator,
-        b => sw(7 downto 0),
-        sel => "0",
-        rez => acumulator_input,
-        carry_out => led(0),
-        aux_carry_out => led(1),
-        ov => led(2)
+        a => temp_reg1,
+        b => temp_reg2,
+        sel => alu_select,
+        rez => alu_output,
+        carry_out => open,
+        aux_carry_out => aux_c_out,
+        ov => open
     );
     
-    accumulator_process: process(clk) 
+  
+    uc: entity work.ControlUnit(Behavioral)
+    port map(
+           clk                      => clk,
+           advance                  => increment_signal,
+           instr                    => "00100101" & "00100101" & "00100101",
+           
+           acumulator_write         => acumulator_write,
+           bus_in_address           => bus_input_control,
+           alu_control              => open,
+           direct_register_acces    => open,
+           write_to_temp            => write_to_temp_control,
+           advance_sp               => open,
+           
+           state                    => uc_state
+    );
+    bus_control: process(clk,bus_input_control)
     begin
-        if rising_edge(clk) then
-            if increment_signal = '1' then
-                acumulator <= acumulator_input;
+        if rising_edge(clk) then 
+            case bus_input_control is
+                when "01" => bus_wire <= mem_out;
+                when "10" => bus_wire <= alu_output;
+                when others => bus_wire <= bus_wire;
+            end case;
+        end if;
+    end process;
+    acumulator_control: process(clk,acumulator_write)
+    begin
+        if rising_edge(clk) then 
+            if acumulator_write = '1' then
+                acumulator <= bus_wire;
             end if;
         end if;
     end process;
+    temp_registers: process(clk,write_to_temp_control)
+    begin
+        if rising_edge(clk) then
+            if write_to_temp_control(0) then
+                temp_reg1 <= acumulator;
+            end if;
+            if write_to_temp_control(1) then
+                temp_reg2 <= bus_wire;
+            end if;
+        end if;
+    end process;
+    memory: entity work.memory_module(Behavioral)
+    port map(
+           clk => clk,   
+           bit_or_byte_mode => sw(15),
+           write_enable   =>  '0',
+           
+           address   => sw(7 downto 0)     ,
+           
+           byte_input   =>  bus_wire  ,
+           bit_input    =>  aux_c_out  ,
+           
+           byte_read    => mem_out,
+           bit_read     => led(0), 
+           PSW => led(15 downto 8)
+    );
+    
+   
     
     debouncer: entity work.Debouncer(Behavioral)
     port map(
@@ -82,7 +152,7 @@ begin
        
     ssd: entity work.SevenSegmentDisplay4Digits(Behavioral)
     port map(
-        number => X"00" & acumulator,
+        number => acumulator  &  bus_wire,
         clk => clk,
         cat => cat,
         an  => an

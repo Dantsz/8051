@@ -33,12 +33,11 @@ use ieee.numeric_std.all;
 
 entity bitfield is
     port(clk : in std_logic;
-         addr: in std_logic_vector(4 downto 0);
+         addr: in std_logic_vector(6 downto 0);
          set: in std_logic;
          unset: in std_logic;
          bit_out: out std_logic
          );
-         
 end bitfield;
 
 architecture Behavioral of bitfield is

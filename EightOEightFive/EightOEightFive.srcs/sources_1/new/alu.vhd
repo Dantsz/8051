@@ -34,7 +34,7 @@ use ieee.numeric_std.all;
 entity alu is
  port( a : in std_logic_vector(7 downto 0 );
        b : in std_logic_vector(7 downto 0 );
-       sel: in std_logic_vector(0 downto 0);
+       sel: in std_logic_vector(1 downto 0);
        rez : out std_logic_vector(7 downto 0);
        --PSW
        --PSW.7
@@ -53,10 +53,15 @@ begin
 process(a,b,sel)
 begin
     case sel is
-        when "0" =>           
+        when "00" =>           
             rez <= std_logic_vector(unsigned_buffer(7 downto 0));   
-        when "1" => 
+        when "01" => 
+            rez <= std_logic_vector(unsigned(a) - unsigned(b));
+        when "10" => 
             rez <= a and b;
+        when "11" =>           
+            rez <= a or b;   
+        
     end case;
 end process;
 unsigned_buffer <= unsigned("0" & a) + unsigned(b);

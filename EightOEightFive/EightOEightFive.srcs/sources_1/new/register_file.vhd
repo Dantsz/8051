@@ -33,13 +33,12 @@ use ieee.numeric_std.all;
 
 entity register_file is
     port(
-     ra1 : in std_logic_vector(7 downto 0);
-     ra2 : in std_logic_vector(7 downto 0);
-     wa : in std_logic_vector(7 downto 0);
+     ra : in std_logic_vector(6 downto 0);
+
+     wa : in std_logic_vector(6 downto 0);
      
      write_value : in std_logic_vector(7 downto 0);
-     read_value_1: out std_logic_vector(7 downto 0);
-     read_value_2: out std_logic_vector(7 downto 0);
+     read_value: out std_logic_vector(7 downto 0);
      
      clk: in std_logic;
      write_enable: in std_logic
@@ -47,8 +46,8 @@ entity register_file is
 end register_file;
 
 architecture Behavioral of register_file is
-type reg_ar is array (0 to 255) of std_logic_vector(7 downto 0);
-signal state : reg_ar := (others=>X"00");
+type reg_ar is array (0 to 127) of std_logic_vector(7 downto 0);
+signal state : reg_ar := (others=>X"01");
 begin
 
     process(clk,write_enable)
@@ -59,6 +58,5 @@ begin
             end if;
         end if;
     end process;
-    read_value_1 <= state(to_integer(unsigned(ra1)));
-    read_value_2 <= state(to_integer(unsigned(ra2)));
+    read_value <= state(to_integer(unsigned(ra)));
 end Behavioral;
