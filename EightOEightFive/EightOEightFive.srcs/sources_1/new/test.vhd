@@ -58,10 +58,10 @@ signal aux_c_out : std_logic;
 signal uc_state : std_logic_vector(27 downto 0);
 
 signal bus_wire: std_logic_vector(7 downto 0);
-signal bus_input_control: std_logic_vector(1 downto 0);
+signal bus_input_control: std_logic_vector(2 downto 0);
 
 signal mem_out: std_logic_vector(7 downto 0);
-
+signal mem_write: std_logic;
 
 signal temp_reg1: std_logic_vector(7 downto 0);
 signal temp_reg2: std_logic_vector(7 downto 0);
@@ -93,6 +93,7 @@ begin
            direct_register_acces    => open,
            write_to_temp            => write_to_temp_control,
            advance_sp               => open,
+           write_memory             => mem_write,
            
            state                    => uc_state
     );
@@ -100,8 +101,8 @@ begin
     begin
         if rising_edge(clk) then 
             case bus_input_control is
-                when "01" => bus_wire <= mem_out;
-                when "10" => bus_wire <= alu_output;
+                when "001" => bus_wire <= mem_out;
+                when "010" => bus_wire <= alu_output;
                 when others => bus_wire <= bus_wire;
             end case;
         end if;
@@ -129,7 +130,7 @@ begin
     port map(
            clk => clk,   
            bit_or_byte_mode => sw(15),
-           write_enable   =>  '0',
+           write_enable   =>  mem_write,
            
            address   => sw(7 downto 0)     ,
            
