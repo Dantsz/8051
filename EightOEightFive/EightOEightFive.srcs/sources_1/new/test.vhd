@@ -57,8 +57,8 @@ signal aux_c_out : std_logic;
 
 signal uc_state : std_logic_vector(27 downto 0);
 
-signal bus_wire: std_logic_vector(7 downto 0);
-signal bus_input_control: std_logic_vector(2 downto 0);
+signal bus_wire: std_logic_vector(15 downto 0);
+signal bus_input_control: std_logic_vector(3 downto 0);
 
 signal mem_out: std_logic_vector(7 downto 0);
 signal mem_write: std_logic;
@@ -67,6 +67,10 @@ signal temp_reg1: std_logic_vector(7 downto 0);
 signal temp_reg2: std_logic_vector(7 downto 0);
 signal write_to_temp_control: std_logic_vector(1 downto 0);
 
+
+signal instruction_pointer: std_logic_vector(7 downto 0);
+signal advance_ip: std_logic;
+signal program_data_out: std_logic_vector(23 downto 0);
 begin
 
     alu: entity work.alu(Behavioral)
@@ -85,33 +89,45 @@ begin
     port map(
            clk                      => clk,
            advance                  => increment_signal,
-           instr                    => "00100101" & "00100101" & "00100101",
+           instr                    => program_data_out,
            
            acumulator_write         => acumulator_write,
            bus_in_address           => bus_input_control,
            alu_control              => open,
            direct_register_acces    => open,
            write_to_temp            => write_to_temp_control,
-           advance_sp               => open,
+           advance_ip               => advance_ip,
            write_memory             => mem_write,
            
-           state                    => uc_state
+           state                    => open
     );
+    
     bus_control: process(clk,bus_input_control)
     begin
         if rising_edge(clk) then 
             case bus_input_control is
-                when "001" => bus_wire <= mem_out;
-                when "010" => bus_wire <= alu_output;
+                when "0001" => bus_wire(7 downto 0) <= mem_out;
+                when "0010" => bus_wire(7 downto 0) <= alu_output;
+                when "0011" => bus_wire(7 downto 0) <= program_data_out(15 downto 8);
+                when "0100" => bus_wire(7 downto 0) <= program_data_out(7 downto 0);
+                when "0101" => bus_wire(7 downto 0) <= acumulator;
+                
+                when "1001" => bus_wire(15 downto 8) <= mem_out;
+                when "1010" => bus_wire(15 downto 8) <= alu_output;
+                when "1011" => bus_wire(15 downto 8) <= program_data_out(15 downto 8);
+                when "1100" => bus_wire(15 downto 8) <= program_data_out(7 downto 0);
+                when "1101" => bus_wire(7 downto 0) <= acumulator;
+                
                 when others => bus_wire <= bus_wire;
             end case;
         end if;
     end process;
+    
     acumulator_control: process(clk,acumulator_write)
     begin
         if rising_edge(clk) then 
             if acumulator_write = '1' then
-                acumulator <= bus_wire;
+                acumulator <= bus_wire(7 downto 0);
             end if;
         end if;
     end process;
@@ -122,7 +138,7 @@ begin
                 temp_reg1 <= acumulator;
             end if;
             if write_to_temp_control(1) then
-                temp_reg2 <= bus_wire;
+                temp_reg2 <= bus_wire(7 downto 0);
             end if;
         end if;
     end process;
@@ -132,17 +148,28 @@ begin
            bit_or_byte_mode => sw(15),
            write_enable   =>  mem_write,
            
-           address   => sw(7 downto 0)     ,
+           address   => bus_wire(15 downto 8)     ,
            
-           byte_input   =>  bus_wire  ,
-           bit_input    =>  aux_c_out  ,
+           byte_input   =>  bus_wire(7 downto 0),
+           bit_input    =>  aux_c_out,
            
            byte_read    => mem_out,
            bit_read     => led(0), 
            PSW => led(15 downto 8)
     );
-    
-   
+    instruction_pointer_control: process(clk,advance_ip,increment_signal)
+    begin
+        if rising_edge(clk) then
+            if advance_ip = '1' and increment_signal = '1' then
+                instruction_pointer <= instruction_pointer + 1;
+            end if;
+        end if;
+    end process;
+    program_data:entity work.program_memory(Behavioral)
+    port map(
+    addr => instruction_pointer,
+    instr => program_data_out
+    );
     
     debouncer: entity work.Debouncer(Behavioral)
     port map(
@@ -153,7 +180,7 @@ begin
        
     ssd: entity work.SevenSegmentDisplay4Digits(Behavioral)
     port map(
-        number => acumulator  &  bus_wire,
+        number => bus_wire,
         clk => clk,
         cat => cat,
         an  => an
