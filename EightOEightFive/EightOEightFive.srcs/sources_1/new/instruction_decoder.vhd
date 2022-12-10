@@ -33,19 +33,23 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity instruction_decoder is
     port(
-        instr: std_logic_vector(23 downto 0);
-        opcode: out std_logic_vector(7 downto 0);
-        param_1: out std_logic_vector(7 downto 0);
-        param_2: out std_logic_vector(7 downto 0)
-        
+        data_in: in std_logic_vector(7 downto 0);
+        we: in std_logic;
+        clk: in std_logic;
+        data_out: out std_logic_vector(7 downto 0)
     );
 end instruction_decoder;
 
 architecture Behavioral of instruction_decoder is
-
+signal state : std_logic_vector(7 downto 0);
 begin
-    opcode <= instr(7 downto 0);
-    param_1 <= instr(15 downto 8);
-    param_2 <= instr(23 downto 16);
-    
+    process(clk,we)
+    begin
+        if(rising_edge(clk) ) then
+            if(we = '1') then
+                state <= data_in;
+            end if;
+        end if;
+    end process;
+    data_out <= state;
 end Behavioral;

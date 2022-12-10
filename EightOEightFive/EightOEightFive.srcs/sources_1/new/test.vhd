@@ -70,8 +70,11 @@ signal write_to_temp_control: std_logic_vector(1 downto 0);
 
 signal instruction_pointer: std_logic_vector(7 downto 0);
 signal ip_input_control: std_logic_vector(3 downto 0);
+signal write_ip_to_decode: std_logic;
 
-signal program_data_out: std_logic_vector(23 downto 0);
+signal program_data_out: std_logic_vector(7 downto 0);
+signal opcode: std_logic_vector(7 downto 0);
+
 begin
 
     alu: entity work.alu(Behavioral)
@@ -90,7 +93,7 @@ begin
     port map(
            clk                      => clk,
            advance                  => increment_signal,
-           instr                    => program_data_out,
+           instr                    => opcode,
            
            acumulator_write         => acumulator_write,
            bus_in_address           => bus_input_control,
@@ -99,24 +102,31 @@ begin
            write_to_temp            => write_to_temp_control,
            ip_input_control         => ip_input_control,
            write_memory             => mem_write,
-           
+           write_ip_to_decode       => write_ip_to_decode,
            state                    => open
     );
-    
+    instruction_decode: entity work.instruction_decoder(Behavioral)
+    port map(
+        clk => clk,
+        we => write_ip_to_decode,
+        data_in => program_data_out,
+        data_out => opcode
+        
+    );
     bus_control: process(clk,bus_input_control)
     begin
         if rising_edge(clk) then 
             case bus_input_control is
                 when "00000001" => bus_wire(7 downto 0) <= mem_out;
                 when "00000010" => bus_wire(7 downto 0) <= alu_output;
-                when "00000011" => bus_wire(7 downto 0) <= program_data_out(15 downto 8);
+                --when "00000011" => bus_wire(7 downto 0) <= program_data_out(15 downto 8);
                 when "00000100" => bus_wire(7 downto 0) <= program_data_out(7 downto 0);
                 when "00000101" => bus_wire(7 downto 0) <= acumulator;
           
                 
                 when "10000001" => bus_wire(15 downto 8) <= mem_out;
                 when "10000010" => bus_wire(15 downto 8) <= alu_output;
-                when "10000011" => bus_wire(15 downto 8) <= program_data_out(15 downto 8);
+                --when "10000011" => bus_wire(15 downto 8) <= program_data_out(15 downto 8);
                 when "10000100" => bus_wire(15 downto 8) <= program_data_out(7 downto 0);
                 when "10000101" => bus_wire(7 downto 0) <= acumulator;
            
@@ -134,6 +144,7 @@ begin
             end if;
         end if;
     end process;
+    
     temp_registers: process(clk,write_to_temp_control)
     begin
         if rising_edge(clk) then
@@ -186,7 +197,7 @@ begin
        
     ssd: entity work.SevenSegmentDisplay4Digits(Behavioral)
     port map(
-        number => bus_wire,
+        number => instruction_pointer & bus_wire(7 downto 0),
         clk => clk,
         cat => cat,
         an  => an

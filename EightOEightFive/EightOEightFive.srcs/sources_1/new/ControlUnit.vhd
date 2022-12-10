@@ -36,7 +36,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity ControlUnit is
  port( clk : in std_logic;
        advance: in std_logic;
-       instr: in std_logic_vector(23 downto 0);
+       instr: in std_logic_vector(7 downto 0);
        
        acumulator_write : out std_logic;
        bus_in_address : out std_logic_vector(7 downto 0);
@@ -44,9 +44,11 @@ entity ControlUnit is
        direct_register_acces: out std_logic;
        write_to_temp: out std_logic_vector(1 downto 0);
        ip_input_control: out std_logic_vector(3 downto 0);
+       write_ip_to_decode: out std_logic;
        write_memory: out std_logic;
        
-       state: out std_logic_vector(27 downto 0)
+       
+       state: out std_logic_vector(11 downto 0)
  );
 end ControlUnit;
 
@@ -58,19 +60,30 @@ begin
 state <= instr & instruction_state;
 generate_signals: process(instr,instruction_state)
     begin
-    case instr(23 downto 16) is 
+    case instr is 
     when X"25" => --ADD a, Direct
         case instruction_state is
-            when "0000" => 
+            when "0000" => --go to next addres in program data for the direct address
                               acumulator_write       <= '0';
-                              bus_in_address         <= "10000011";
+                              bus_in_address         <= "00000000";
+                              alu_control            <= "00";
+                              direct_register_acces  <= '0';
+                              write_to_temp          <= "00";
+                              write_memory           <= '0';
+                              ip_input_control       <= "0001";
+                              write_ip_to_decode     <= '0';
+                              reset_state            <= '0';
+            when "0001" => --write direct address to upper bus
+                              acumulator_write       <= '0';
+                              bus_in_address         <= "10000100";
                               alu_control            <= "00";
                               direct_register_acces  <= '0';
                               write_to_temp          <= "00";
                               write_memory           <= '0';
                               ip_input_control       <= "0000";
+                              write_ip_to_decode     <= '0';
                               reset_state            <= '0';
-            when "0001" => 
+            when "0010" => ---read memory and place in lower bus
                               acumulator_write       <= '0';
                               bus_in_address         <= "00000001";
                               alu_control            <= "00";
@@ -78,8 +91,9 @@ generate_signals: process(instr,instruction_state)
                               write_to_temp          <= "00";
                               write_memory           <= '0';
                               ip_input_control       <= "0000";
+                              write_ip_to_decode     <= '0';
                               reset_state            <= '0';
-            when "0010" => 
+            when "0011" => 
                               acumulator_write       <= '0';
                               bus_in_address         <= "00000000";
                               alu_control            <= "00";
@@ -87,8 +101,9 @@ generate_signals: process(instr,instruction_state)
                               write_memory           <= '0';
                               write_to_temp          <= "11";
                               ip_input_control       <= "0000";
+                              write_ip_to_decode     <= '0';
                               reset_state            <= '0';
-            when "0011" => 
+            when "0100" => 
                               acumulator_write       <= '0';
                               bus_in_address         <= "00000010";
                               alu_control            <= "00";
@@ -96,6 +111,7 @@ generate_signals: process(instr,instruction_state)
                               write_to_temp          <= "00";
                               write_memory           <= '0';
                               ip_input_control       <= "0000";
+                              write_ip_to_decode     <= '0';
                               reset_state            <= '0';
             when others => 
                               acumulator_write       <= '1';
@@ -105,62 +121,98 @@ generate_signals: process(instr,instruction_state)
                               write_to_temp          <= "00";
                               write_memory           <= '0';
                               ip_input_control       <= "0001";
+                              write_ip_to_decode     <= '1';
                               reset_state            <= '1';
             end case;
     when X"74" => --MOV A Imm
          case instruction_state is
-               when "0000" => 
-                                 acumulator_write       <= '0';
-                                 bus_in_address         <= "00000011";
-                                 alu_control            <= "00";
-                                 direct_register_acces  <= '0';
-                                 write_to_temp          <= "00";
-                                 write_memory           <= '0';
-                                 ip_input_control       <= "0000";
-                                 reset_state            <= '0';
-               when others => 
-                                 acumulator_write       <= '1';
-                                 bus_in_address         <= "00000000";
-                                 alu_control            <= "00";
-                                 direct_register_acces  <= '0';
-                                 write_to_temp          <= "00";
-                                 write_memory           <= '0';
-                                 ip_input_control       <= "0001";
-                                 reset_state            <= '1';
+                when "0000" => -- move ip to next byte
+                               acumulator_write       <= '0';
+                               bus_in_address         <= "00000000";
+                               alu_control            <= "00";
+                               direct_register_acces  <= '0';
+                               write_to_temp          <= "00";
+                               write_memory           <= '0';
+                               ip_input_control       <= "0001";
+                               write_ip_to_decode     <= '0';
+                               reset_state            <= '0';
+               when "0001" => --write next byte to lower bus
+                               acumulator_write       <= '0';
+                               bus_in_address         <= "00000100";
+                               alu_control            <= "00";
+                               direct_register_acces  <= '0';
+                               write_to_temp          <= "00";
+                               write_memory           <= '0';
+                               ip_input_control       <= "0000";
+                               write_ip_to_decode     <= '0';
+                               reset_state            <= '0';
+               when others => --write to acumulator
+                               acumulator_write       <= '1';
+                               bus_in_address         <= "00000000";
+                               alu_control            <= "00";
+                               direct_register_acces  <= '0';
+                               write_to_temp          <= "00";
+                               write_memory           <= '0';
+                               ip_input_control       <= "0001";
+                               write_ip_to_decode     <= '1';
+                               reset_state            <= '1';
                end case;
      when X"75" => --MOV direct Imm
-          case instruction_state is
-                when "0000" => 
-                                  acumulator_write       <= '0';
-                                  bus_in_address         <= "00000100";
-                                  alu_control            <= "00";
-                                  direct_register_acces  <= '0';
-                                  write_to_temp          <= "00";
-                                  write_memory           <= '0';
-                                  ip_input_control       <= "0000";
-                                  reset_state            <= '0';
-                when "0001" => 
-                                 acumulator_write       <= '0';
-                                 bus_in_address         <= "10000011";
-                                 alu_control            <= "00";
-                                 direct_register_acces  <= '0';
-                                 write_to_temp          <= "00";
-                                 write_memory           <= '0';
-                                 ip_input_control       <= "0000";
-                                 reset_state            <= '0';
+         case instruction_state is
+                 when "0000" => -- move ip to next byte
+                                acumulator_write       <= '0';
+                                bus_in_address         <= "00000000";
+                                alu_control            <= "00";
+                                direct_register_acces  <= '0';
+                                write_to_temp          <= "00";
+                                write_memory           <= '0';
+                                ip_input_control       <= "0001";
+                                write_ip_to_decode     <= '0';
+                                reset_state            <= '0';
+                when "0001" => --write next byte to upper bus
+                                acumulator_write       <= '0';
+                                bus_in_address         <= "10000100";
+                                alu_control            <= "00";
+                                direct_register_acces  <= '0';
+                                write_to_temp          <= "00";
+                                write_memory           <= '0';
+                                ip_input_control       <= "0000";
+                                write_ip_to_decode     <= '0';
+                                reset_state            <= '0';   
+                when "0010" => -- move ip to next byte
+                               acumulator_write       <= '0';
+                               bus_in_address         <= "00000000";
+                               alu_control            <= "00";
+                               direct_register_acces  <= '0';
+                               write_to_temp          <= "00";
+                               write_memory           <= '0';
+                               ip_input_control       <= "0001";
+                               write_ip_to_decode     <= '0';
+                               reset_state            <= '0';                               
+                when "0011" => --write next byte to upper bus
+                               acumulator_write       <= '0';
+                               bus_in_address         <= "00000100";
+                               alu_control            <= "00";
+                               direct_register_acces  <= '0';
+                               write_to_temp          <= "00";
+                               write_memory           <= '0';
+                               ip_input_control       <= "0000";
+                               write_ip_to_decode     <= '0'; 
+                               reset_state            <= '0';                              
                 when others => 
-                                  acumulator_write       <= '0';
-                                  bus_in_address         <= "00000000";
-                                  alu_control            <= "00";
-                                  direct_register_acces  <= '0';
-                                  write_to_temp          <= "00";
-                                  write_memory           <= '1';
-                                  ip_input_control       <= "0001";
-                                  reset_state            <= '1';
+                                acumulator_write       <= '0';
+                                bus_in_address         <= "00000000";
+                                alu_control            <= "00";
+                                direct_register_acces  <= '0';
+                                write_to_temp          <= "00";
+                                write_memory           <= '1';
+                                ip_input_control       <= "0001";
+                                write_ip_to_decode     <= '1';
+                                reset_state            <= '1';
                 end case;
       when X"F5" => --MOV direct A
              case instruction_state is
-                   when "0000" => 
+                   when "0000" => --write a to lower bus
                                      acumulator_write       <= '0';
                                      bus_in_address         <= "00000101";
                                      alu_control            <= "00";
@@ -168,17 +220,28 @@ generate_signals: process(instr,instruction_state)
                                      write_to_temp          <= "00";
                                      write_memory           <= '0';
                                      ip_input_control       <= "0000";
-                                     reset_state            <= '0';
-                   when "0001" => 
+                                     write_ip_to_decode     <= '0';
+                   when "0001" => -- move ip to next byte
+                                     acumulator_write       <= '0';
+                                     bus_in_address         <= "00000000";
+                                     alu_control            <= "00";
+                                     direct_register_acces  <= '0';
+                                     write_to_temp          <= "00";
+                                     write_memory           <= '0';
+                                     ip_input_control       <= "0001";
+                                     write_ip_to_decode     <= '0';
+                                     reset_state            <= '0';                                                                        
+                   when "0010" => --move ip to upper bus
                                     acumulator_write       <= '0';
-                                    bus_in_address         <= "10000011";
+                                    bus_in_address         <= "10000100";
                                     alu_control            <= "00";
                                     direct_register_acces  <= '0';
                                     write_to_temp          <= "00";
                                     write_memory           <= '0';
                                     ip_input_control       <= "0000";
+                                    write_ip_to_decode     <= '0';
                                     reset_state            <= '0';
-                   when others => 
+                   when others =>  --write to mem
                                      acumulator_write       <= '0';
                                      bus_in_address         <= "00000000";
                                      alu_control            <= "00";
@@ -186,6 +249,7 @@ generate_signals: process(instr,instruction_state)
                                      write_to_temp          <= "00";
                                      write_memory           <= '1';
                                      ip_input_control       <= "0001";
+                                     write_ip_to_decode     <= '1';
                                      reset_state            <= '1';
                    end case;    
     when others => 
@@ -196,6 +260,7 @@ generate_signals: process(instr,instruction_state)
          write_to_temp          <= "00";
          write_memory           <= '0';
          ip_input_control       <= "0001";
+         write_ip_to_decode     <= '1';
          reset_state            <= '1';
     end case;
 end process;
