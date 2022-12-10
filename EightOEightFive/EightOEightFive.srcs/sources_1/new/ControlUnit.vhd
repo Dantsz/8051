@@ -39,11 +39,11 @@ entity ControlUnit is
        instr: in std_logic_vector(23 downto 0);
        
        acumulator_write : out std_logic;
-       bus_in_address : out std_logic_vector(3 downto 0);
+       bus_in_address : out std_logic_vector(7 downto 0);
        alu_control: out std_logic_vector(1 downto 0);
        direct_register_acces: out std_logic;
        write_to_temp: out std_logic_vector(1 downto 0);
-       advance_ip: out std_logic;
+       ip_input_control: out std_logic_vector(3 downto 0);
        write_memory: out std_logic;
        
        state: out std_logic_vector(27 downto 0)
@@ -59,105 +59,143 @@ state <= instr & instruction_state;
 generate_signals: process(instr,instruction_state)
     begin
     case instr(23 downto 16) is 
-    when "00100101" => --ADD a, Direct
+    when X"25" => --ADD a, Direct
         case instruction_state is
             when "0000" => 
                               acumulator_write       <= '0';
-                              bus_in_address         <= "0001";
+                              bus_in_address         <= "10000011";
                               alu_control            <= "00";
                               direct_register_acces  <= '0';
                               write_to_temp          <= "00";
                               write_memory           <= '0';
-                              advance_ip             <= '0';
+                              ip_input_control       <= "0000";
                               reset_state            <= '0';
             when "0001" => 
                               acumulator_write       <= '0';
-                              bus_in_address         <= "0000";
+                              bus_in_address         <= "00000001";
+                              alu_control            <= "00";
+                              direct_register_acces  <= '0';
+                              write_to_temp          <= "00";
+                              write_memory           <= '0';
+                              ip_input_control       <= "0000";
+                              reset_state            <= '0';
+            when "0010" => 
+                              acumulator_write       <= '0';
+                              bus_in_address         <= "00000000";
                               alu_control            <= "00";
                               direct_register_acces  <= '0';
                               write_memory           <= '0';
                               write_to_temp          <= "11";
-                              advance_ip             <= '0';
+                              ip_input_control       <= "0000";
                               reset_state            <= '0';
-            when "0010" => 
+            when "0011" => 
                               acumulator_write       <= '0';
-                              bus_in_address         <= "0010";
+                              bus_in_address         <= "00000010";
                               alu_control            <= "00";
                               direct_register_acces  <= '0';
                               write_to_temp          <= "00";
                               write_memory           <= '0';
-                              advance_ip             <= '0';
+                              ip_input_control       <= "0000";
                               reset_state            <= '0';
             when others => 
                               acumulator_write       <= '1';
-                              bus_in_address         <= "0000";
+                              bus_in_address         <= "00000000";
                               alu_control            <= "00";
                               direct_register_acces  <= '0';
                               write_to_temp          <= "00";
                               write_memory           <= '0';
-                              advance_ip             <= '1';
+                              ip_input_control       <= "0001";
                               reset_state            <= '1';
             end case;
-    when "01110100" => --MOV A Imm
+    when X"74" => --MOV A Imm
          case instruction_state is
                when "0000" => 
                                  acumulator_write       <= '0';
-                                 bus_in_address         <= "0011";
+                                 bus_in_address         <= "00000011";
                                  alu_control            <= "00";
                                  direct_register_acces  <= '0';
                                  write_to_temp          <= "00";
                                  write_memory           <= '0';
-                                 advance_ip             <= '0';
+                                 ip_input_control       <= "0000";
                                  reset_state            <= '0';
                when others => 
                                  acumulator_write       <= '1';
-                                 bus_in_address         <= "0000";
+                                 bus_in_address         <= "00000000";
                                  alu_control            <= "00";
                                  direct_register_acces  <= '0';
                                  write_to_temp          <= "00";
                                  write_memory           <= '0';
-                                 advance_ip             <= '1';
+                                 ip_input_control       <= "0001";
                                  reset_state            <= '1';
                end case;
-     when "01110101" => --MOV direct Imm
+     when X"75" => --MOV direct Imm
           case instruction_state is
                 when "0000" => 
                                   acumulator_write       <= '0';
-                                  bus_in_address         <= "0100";
+                                  bus_in_address         <= "00000100";
                                   alu_control            <= "00";
                                   direct_register_acces  <= '0';
                                   write_to_temp          <= "00";
                                   write_memory           <= '0';
-                                  advance_ip             <= '0';
+                                  ip_input_control       <= "0000";
                                   reset_state            <= '0';
                 when "0001" => 
                                  acumulator_write       <= '0';
-                                 bus_in_address         <= "1011";
+                                 bus_in_address         <= "10000011";
                                  alu_control            <= "00";
                                  direct_register_acces  <= '0';
                                  write_to_temp          <= "00";
                                  write_memory           <= '0';
-                                 advance_ip             <= '0';
+                                 ip_input_control       <= "0000";
                                  reset_state            <= '0';
                 when others => 
                                   acumulator_write       <= '0';
-                                  bus_in_address         <= "0000";
+                                  bus_in_address         <= "00000000";
                                   alu_control            <= "00";
                                   direct_register_acces  <= '0';
                                   write_to_temp          <= "00";
                                   write_memory           <= '1';
-                                  advance_ip             <= '1';
+                                  ip_input_control       <= "0001";
                                   reset_state            <= '1';
                 end case;
-    
+      when X"F5" => --MOV direct A
+             case instruction_state is
+                   when "0000" => 
+                                     acumulator_write       <= '0';
+                                     bus_in_address         <= "00000101";
+                                     alu_control            <= "00";
+                                     direct_register_acces  <= '0';
+                                     write_to_temp          <= "00";
+                                     write_memory           <= '0';
+                                     ip_input_control       <= "0000";
+                                     reset_state            <= '0';
+                   when "0001" => 
+                                    acumulator_write       <= '0';
+                                    bus_in_address         <= "10000011";
+                                    alu_control            <= "00";
+                                    direct_register_acces  <= '0';
+                                    write_to_temp          <= "00";
+                                    write_memory           <= '0';
+                                    ip_input_control       <= "0000";
+                                    reset_state            <= '0';
+                   when others => 
+                                     acumulator_write       <= '0';
+                                     bus_in_address         <= "00000000";
+                                     alu_control            <= "00";
+                                     direct_register_acces  <= '0';
+                                     write_to_temp          <= "00";
+                                     write_memory           <= '1';
+                                     ip_input_control       <= "0001";
+                                     reset_state            <= '1';
+                   end case;    
     when others => 
          acumulator_write       <= '0';
-         bus_in_address         <= "0000";
+         bus_in_address         <= "00000000";
          alu_control            <= "00";
          direct_register_acces  <= '0';
          write_to_temp          <= "00";
          write_memory           <= '0';
-         advance_ip             <= '1';
+         ip_input_control       <= "0001";
          reset_state            <= '1';
     end case;
 end process;

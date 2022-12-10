@@ -58,7 +58,7 @@ signal aux_c_out : std_logic;
 signal uc_state : std_logic_vector(27 downto 0);
 
 signal bus_wire: std_logic_vector(15 downto 0);
-signal bus_input_control: std_logic_vector(3 downto 0);
+signal bus_input_control: std_logic_vector(7 downto 0);
 
 signal mem_out: std_logic_vector(7 downto 0);
 signal mem_write: std_logic;
@@ -69,7 +69,8 @@ signal write_to_temp_control: std_logic_vector(1 downto 0);
 
 
 signal instruction_pointer: std_logic_vector(7 downto 0);
-signal advance_ip: std_logic;
+signal ip_input_control: std_logic_vector(3 downto 0);
+
 signal program_data_out: std_logic_vector(23 downto 0);
 begin
 
@@ -96,7 +97,7 @@ begin
            alu_control              => open,
            direct_register_acces    => open,
            write_to_temp            => write_to_temp_control,
-           advance_ip               => advance_ip,
+           ip_input_control         => ip_input_control,
            write_memory             => mem_write,
            
            state                    => open
@@ -106,17 +107,19 @@ begin
     begin
         if rising_edge(clk) then 
             case bus_input_control is
-                when "0001" => bus_wire(7 downto 0) <= mem_out;
-                when "0010" => bus_wire(7 downto 0) <= alu_output;
-                when "0011" => bus_wire(7 downto 0) <= program_data_out(15 downto 8);
-                when "0100" => bus_wire(7 downto 0) <= program_data_out(7 downto 0);
-                when "0101" => bus_wire(7 downto 0) <= acumulator;
+                when "00000001" => bus_wire(7 downto 0) <= mem_out;
+                when "00000010" => bus_wire(7 downto 0) <= alu_output;
+                when "00000011" => bus_wire(7 downto 0) <= program_data_out(15 downto 8);
+                when "00000100" => bus_wire(7 downto 0) <= program_data_out(7 downto 0);
+                when "00000101" => bus_wire(7 downto 0) <= acumulator;
+          
                 
-                when "1001" => bus_wire(15 downto 8) <= mem_out;
-                when "1010" => bus_wire(15 downto 8) <= alu_output;
-                when "1011" => bus_wire(15 downto 8) <= program_data_out(15 downto 8);
-                when "1100" => bus_wire(15 downto 8) <= program_data_out(7 downto 0);
-                when "1101" => bus_wire(7 downto 0) <= acumulator;
+                when "10000001" => bus_wire(15 downto 8) <= mem_out;
+                when "10000010" => bus_wire(15 downto 8) <= alu_output;
+                when "10000011" => bus_wire(15 downto 8) <= program_data_out(15 downto 8);
+                when "10000100" => bus_wire(15 downto 8) <= program_data_out(7 downto 0);
+                when "10000101" => bus_wire(7 downto 0) <= acumulator;
+           
                 
                 when others => bus_wire <= bus_wire;
             end case;
@@ -157,11 +160,14 @@ begin
            bit_read     => led(0), 
            PSW => led(15 downto 8)
     );
-    instruction_pointer_control: process(clk,advance_ip,increment_signal)
+    instruction_pointer_control: process(clk,ip_input_control,increment_signal)
     begin
         if rising_edge(clk) then
-            if advance_ip = '1' and increment_signal = '1' then
-                instruction_pointer <= instruction_pointer + 1;
+          if  increment_signal = '1' then
+            case ip_input_control is
+                when "0001" => instruction_pointer <= instruction_pointer + 1;
+                when others => instruction_pointer <= instruction_pointer;
+            end case;             
             end if;
         end if;
     end process;

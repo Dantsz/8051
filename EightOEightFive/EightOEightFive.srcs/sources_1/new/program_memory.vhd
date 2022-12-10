@@ -41,9 +41,19 @@ end program_memory;
 architecture Behavioral of program_memory is
 type progmem is array (0 to 255) of std_logic_vector(23 downto 0);
 signal state : progmem := (
-                            X"741010",
-                            X"252525",
-                            X"75D069",
+                            --X"741010",--MOV A Imm
+                            --X"252525",--ADD a, Direct
+                             --X"75D069",--MOV direct Imm
+                             X"751269",
+                             X"251200",
+                             
+                             X"F5D000",
+                             X"751269",                           
+                             X"251200",
+                             X"F5D000",
+                             X"751269",
+                             X"251200",
+                             X"F5D000",--MOV d0 A
                             others=>X"000000");
 begin
     instr <= state(to_integer(unsigned(addr)));
