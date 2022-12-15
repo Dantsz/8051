@@ -47,7 +47,7 @@ signal number : std_logic_vector(15 downto 0):= X"0000";
 signal increment_signal : std_logic;
 signal increment_twelve: std_logic;
 
-signal alu_select: std_logic_vector(1 downto 0) := "00";
+signal alu_control : std_logic_vector(1 downto 0);
 signal alu_output: std_logic_vector(7 downto 0);
 
 signal acumulator: std_logic_vector(7 downto 0);
@@ -55,7 +55,7 @@ signal acumulator_write : std_logic;
 
 signal aux_c_out : std_logic;
 
-signal uc_state : std_logic_vector(27 downto 0);
+signal uc_state : std_logic_vector(11 downto 0);
 
 signal bus_wire: std_logic_vector(15 downto 0);
 signal bus_input_control: std_logic_vector(7 downto 0);
@@ -75,13 +75,17 @@ signal write_ip_to_decode: std_logic;
 signal program_data_out: std_logic_vector(7 downto 0);
 signal opcode: std_logic_vector(7 downto 0);
 
+signal bit_or_byte_memory_operation: std_logic;
+
+
+
 begin
 
     alu: entity work.alu(Behavioral)
     port map(
         a => temp_reg1,
         b => temp_reg2,
-        sel => alu_select,
+        sel => alu_control,
         rez => alu_output,
         carry_out => open,
         aux_carry_out => aux_c_out,
@@ -97,13 +101,14 @@ begin
            
            acumulator_write         => acumulator_write,
            bus_in_address           => bus_input_control,
-           alu_control              => open,
+           alu_control              => alu_control,
            direct_register_acces    => open,
            write_to_temp            => write_to_temp_control,
            ip_input_control         => ip_input_control,
            write_memory             => mem_write,
            write_ip_to_decode       => write_ip_to_decode,
-           state                    => open
+           bit_or_byte_memory_operation => bit_or_byte_memory_operation,
+           state                    => uc_state
     );
     instruction_decode: entity work.instruction_decoder(Behavioral)
     port map(
@@ -159,13 +164,13 @@ begin
     memory: entity work.memory_module(Behavioral)
     port map(
            clk => clk,   
-           bit_or_byte_mode => sw(15),
+           bit_or_byte_mode => bit_or_byte_memory_operation,
            write_enable   =>  mem_write,
            
            address   => bus_wire(15 downto 8)     ,
            
            byte_input   =>  bus_wire(7 downto 0),
-           bit_input    =>  aux_c_out,
+           bit_input    =>  bus_wire(1),
            
            byte_read    => mem_out,
            bit_read     => led(0), 
@@ -197,7 +202,7 @@ begin
        
     ssd: entity work.SevenSegmentDisplay4Digits(Behavioral)
     port map(
-        number => instruction_pointer & bus_wire(7 downto 0),
+        number => bus_wire ,
         clk => clk,
         cat => cat,
         an  => an
