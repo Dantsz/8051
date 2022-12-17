@@ -45,6 +45,7 @@ end test;
 architecture Behavioral of test is
 signal number : std_logic_vector(15 downto 0):= X"0000";
 signal increment_signal : std_logic;
+signal debouncer_counter :std_logic_vector(23 downto 0);
 signal increment_twelve: std_logic;
 
 signal alu_control : std_logic_vector(1 downto 0);
@@ -181,10 +182,10 @@ begin
            bit_read     => led(0), 
            PSW => led(15 downto 8)
     );
-    instruction_pointer_control: process(clk,ip_input_control,increment_signal)
+    instruction_pointer_control: process(clk)
     begin
         if rising_edge(clk) then
-          if  increment_signal = '1' then
+           if increment_signal = '1' then
             case ip_input_control is
                 when "0001" => instruction_pointer <= instruction_pointer + 1;
                 when "0011" => instruction_pointer <= instruction_pointer + bus_wire(15 downto 8);
@@ -199,16 +200,23 @@ begin
     instr => program_data_out
     );
     
-    debouncer: entity work.Debouncer(Behavioral)
-    port map(
-    clk => clk,
-    input => btn(0),
-    output => increment_signal
-    );
-       
+    --debouncer: entity work.Debouncer(Behavioral)
+    --port map(
+    --clk => clk,
+    --input => btn(0),
+    --output => increment_signal
+    --);
+    debouncer: process(clk)
+    begin
+    if rising_edge(clk) then 
+        debouncer_counter <= debouncer_counter + 1;
+    end if;
+    end process; 
+    increment_signal <= '1' when debouncer_counter = X"000" else '0';
+    
     ssd: entity work.SevenSegmentDisplay4Digits(Behavioral)
     port map(
-        number => temp_reg2  &  temp_reg1 ,--"0000" & uc_state ,
+        number => temp_reg2  &  temp_reg1 ,--"0000" & uc_state , 
         clk => clk,
         cat => cat,
         an  => an

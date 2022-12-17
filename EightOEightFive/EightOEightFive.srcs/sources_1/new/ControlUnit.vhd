@@ -214,7 +214,18 @@ generate_signals: process(instr,instruction_state)
                                ip_input_control       <= "0001";
                                write_ip_to_decode     <= '0'; 
                                reset_state            <= '0';  
-                               bit_or_byte_memory_operation <= '1';                            
+                               bit_or_byte_memory_operation <= '1';   
+                when "0100" => 
+                               acumulator_write       <= '0';
+                               bus_in_address         <= "00000000";
+                               alu_control            <= "00";
+                               direct_register_acces  <= '0';
+                               write_to_temp          <= "00";
+                               write_memory           <= '1';
+                               ip_input_control       <= "0000";
+                               write_ip_to_decode     <= '0';
+                               reset_state            <= '0';
+                               bit_or_byte_memory_operation <= '1';                         
                 when others => 
                                 acumulator_write       <= '0';
                                 bus_in_address         <= "00000000";
@@ -508,7 +519,7 @@ increment_state: process(clk)
         elsif instruction_state = clocks_per_instruction_cycle_plus_one then
           instruction_state <= X"0";
         else          
-            if advance = '1' then 
+            if(advance = '1') then
                 instruction_state <= instruction_state + 1;
             end if;
         end if;

@@ -47,10 +47,11 @@ signal state : progmem := (
                             --X"F5" - MOV Direct A
                             -- X"75D069",--MOV direct Imm
                             -- x"b5" -- cmpjg Direct Offset   
-                            -- 0   1    2 
+                            X"00",
+                            -- 0   1    2
                             X"75",X"20",X"19",
                             -- 3   4    5
-                            X"75",X"21",X"2D",
+                            X"75",X"21",X"2d",
                             --6     7
                             X"E5",X"20",
                             --8     9
