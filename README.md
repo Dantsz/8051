@@ -1,10 +1,10 @@
 # 8051
-Scheme:
+Schema:
 
 
 ![image](https://user-images.githubusercontent.com/19265585/197328566-e93496ae-ff98-4439-8e70-84281887b218.png)
 
-Bibliografie in ordinea relevantei: 
+Bibliografy: 
 * https://www.keil.com/support/man/docs/is51/
 * https://www.silabs.com/documents/public/presentations/8051_Instruction_Set.pdf
 Others: 
