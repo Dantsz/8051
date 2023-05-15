@@ -1,4 +1,4 @@
-# 8051
+# Microcontroller implementing 8051 controller
 Schema:
 
 
