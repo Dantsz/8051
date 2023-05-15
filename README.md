@@ -1,6 +1,7 @@
-# Microcontroller implementing 8051 controller
+# Microcontroller implementing 8051 instructions
 Schema:
 ![image](https://user-images.githubusercontent.com/19265585/197328566-e93496ae-ff98-4439-8e70-84281887b218.png)
+
 Features:
 
 8-bit arithmetic logic unit (ALU) and accumulator, 8-bit registers (one 16-bit register with special move instructions), 8-bit data bus and 2×16-bit address buses, program counter, data pointer, and related 8/11/16-bit operations; hence it is mainly an 8-bit microcontroller
