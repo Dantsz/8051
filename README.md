@@ -8,6 +8,7 @@ Features:
 * 8-bit registers (one 16-bit register with special move instructions)
 * 8-bit data bus and 2×16-bit address buses, program counter
 * base 8051 memory layout
+
 Bibliography: 
 * https://www.keil.com/support/man/docs/is51/
 * https://www.silabs.com/documents/public/presentations/8051_Instruction_Set.pdf
