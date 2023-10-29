@@ -1,4 +1,4 @@
-# Microcontroller implementing 8051 instructions
+# 8051 microcontroller
 
 ![image](https://user-images.githubusercontent.com/19265585/197328566-e93496ae-ff98-4439-8e70-84281887b218.png)
 
